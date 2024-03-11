@@ -57,15 +57,17 @@ class AccountService:
 
     def login_user(self, email: str, password: str):
         try:
-            if email is None:
+            if email is None or email == "":
                 raise exceptions.BadRequest("Email is required!")
-            if password is None:
+            if password is None or password == "":
                 raise exceptions.BadRequest("Password is required!")
 
-            user = get_object_or_404(User, email=email)
+            user = User.objects.filter(email=email).first()
+            if not user:
+                raise exceptions.UnAuthorizedError("Invalid credentials!")
 
             if not user.check_password(password):
-                raise exceptions.UnauthorizedError("Invalid credentials!")
+                raise exceptions.UnAuthorizedError("Invalid credentials!")
 
             user.last_login = timezone.now()
             user.save(update_fields=["last_login"])
