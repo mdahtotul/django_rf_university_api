@@ -74,14 +74,14 @@ class TestRegisterUser:
         assert res.status_code == status.HTTP_201_CREATED
 
     def test_if_user_is_admin_upload_image_returns_201(
-        self, api_client, authenticate, create_user
+        self, api_client, authenticate, create_user, remove_image
     ):
         self.setUp()
         authenticate(is_staff=True, role=ROLE_ADMIN)
 
-        with tempfile.NamedTemporaryFile(suffix=".jpg") as avatar:
+        with tempfile.NamedTemporaryFile(suffix=".jpg", delete=False) as avatar:
             img = Image.new("RGB", (100, 100), "white")
-            img.save(avatar, "PNG")
+            img.save(avatar, "JPEG")
             avatar.seek(0)
 
             payload = {
@@ -90,8 +90,9 @@ class TestRegisterUser:
                 "avatar": avatar,
             }
             res = create_user(payload)
-
             assert res.status_code == status.HTTP_201_CREATED
+
+            remove_image(res.data["avatar"])
 
     def test_if_user_is_admin_upload_invalid_image_returns_400(
         self, api_client, authenticate, create_user

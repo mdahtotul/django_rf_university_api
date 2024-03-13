@@ -1,3 +1,5 @@
+BASE_DIR = "D:/personal/django_rf_university_api"  # this var is for test purpose
+
 ROLE_ADMIN = "admin"
 ROLE_STAFF = "staff"
 ROLE_STUDENT = "student"

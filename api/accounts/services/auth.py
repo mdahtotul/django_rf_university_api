@@ -1,9 +1,7 @@
 # External imports
 from django.utils import timezone
 from django.db import transaction
-from django.conf import settings
 from django.shortcuts import get_object_or_404
-from PIL import Image
 
 # Internal imports
 from core import exceptions
@@ -22,7 +20,7 @@ class AccountService:
         last_name: None,
         email: None,
         password: None,
-        phone: str,
+        phone: None,
         avatar: None,
     ):
         try:
@@ -51,6 +49,39 @@ class AccountService:
             new_user.save()
 
             data = serializers.SimpleUserSerializer(new_user).data
+            return data
+        except Exception as e:
+            raise e
+
+    def update_old_user(
+        self,
+        user,
+        first_name: None,
+        last_name: None,
+        phone: None,
+        avatar: None,
+    ):
+        try:
+            if phone != "" and phone != None:
+                if User.objects.filter(phone=phone).exists():
+                    raise exceptions.ConflictError("Phone number already exists!")
+                user.phone = phone
+
+            if first_name != None and first_name != "":
+                user.first_name = first_name
+            if last_name != None and last_name != "":
+                user.last_name = last_name
+
+            if avatar is not None:
+
+                if not is_valid_image(avatar):
+                    raise exceptions.BadRequest("Invalid image!")
+
+                user.avatar = avatar
+
+            user.save()
+
+            data = serializers.SimpleUserSerializer(user).data
             return data
         except Exception as e:
             raise e
