@@ -17,7 +17,7 @@ services:
              python manage.py runserver 0.0.0.0:8000"
     environment:
       - DEBUG=${DEBUG}
-      - DB_HOST=dev # host will be dev for docker but localhost for local
+      - DB_HOST=db # host will be db for docker but localhost for local
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
