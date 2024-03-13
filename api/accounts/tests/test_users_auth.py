@@ -91,6 +91,7 @@ class TestRegisterUser:
             }
             res = create_user(payload)
             assert res.status_code == status.HTTP_201_CREATED
+            assert res.data["avatar"] is not None
 
             remove_image(res.data["avatar"])
 
@@ -112,6 +113,7 @@ class TestRegisterUser:
             res = create_user(payload)
 
             assert res.status_code == status.HTTP_400_BAD_REQUEST
+            assert res.data.get("avatar") is None
 
 
 @pytest.fixture

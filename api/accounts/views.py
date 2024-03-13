@@ -14,7 +14,7 @@ account_service = AccountService()
 
 
 class RegisterView(APIView):
-    permission_classes = [AdminOrReadOnly]
+    permission_classes = [AdminOnly]
 
     def post(self, request, format=None):
         first_name = request.data.get("first_name")
@@ -47,6 +47,8 @@ class LoginUserView(APIView):
 
 
 class UsersView(APIView):
+    permission_classes = [AdminOnly]
+
     def get(self, request):
         users = User.objects.all()
         serializer = serializers.SimpleUserSerializer(users, many=True)
@@ -54,7 +56,7 @@ class UsersView(APIView):
 
 
 class UserDetailsView(APIView):
-    permission_classes = [AdminOrReadOnly]
+    permission_classes = [AdminOnly]
 
     def get(self, request, user_id):
         user = get_object_or_404(User, pk=user_id)
@@ -80,4 +82,6 @@ class UserDetailsView(APIView):
         return Response(data=data, status=status.HTTP_200_OK)
 
     def delete(self, request, user_id):
-        pass
+        user = get_object_or_404(User, pk=user_id)
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

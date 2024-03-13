@@ -2,7 +2,8 @@ import pytest
 import os
 from rest_framework.test import APIClient
 
-from core.constants import BASE_DIR, ROLE_USER
+from core.constants import ROLE_USER
+from core.settings import BASE_DIR
 from accounts.models import User
 
 
@@ -17,6 +18,14 @@ def authenticate(api_client):
         return api_client.force_authenticate(user=User(is_staff=is_staff, role=role))
 
     return do_authenticate
+
+
+@pytest.fixture
+def create_user_db(api_client):
+    def receive_instance(instance):
+        return User.objects.create_user(**instance)
+
+    return receive_instance
 
 
 @pytest.fixture()
