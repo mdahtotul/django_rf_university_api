@@ -2,7 +2,7 @@ import pytest
 from rest_framework import status
 from model_bakery import baker
 
-from accounts.models import User
+from account.models import User
 from core.constants import ROLE_ADMIN, ROLE_STAFF
 
 
@@ -82,6 +82,17 @@ class TestRetrieveSingleUser:
         res = retrieve_user(user1.id)
 
         assert res.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_admin_item_not_exist_returns_404(
+        self, api_client, authenticate, retrieve_user
+    ):
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+
+        user1 = baker.make(User)
+        dummy_id = user1.id + 10
+
+        res = retrieve_user(dummy_id)
+        assert res.status_code == status.HTTP_404_NOT_FOUND
 
     def test_if_user_is_admin_returns_200(
         self, api_client, authenticate, retrieve_user

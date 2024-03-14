@@ -8,7 +8,7 @@ import pytest
 
 # Internal imports
 from core.constants import ROLE_ADMIN, ROLE_STAFF
-from accounts.models import User
+from account.models import User
 
 
 @pytest.fixture
@@ -47,6 +47,20 @@ class TestUserRetrieveAndUpdate:
         res = retrieve_and_update_user(payload, user.id)
 
         assert res.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_admin_item_not_exist_returns_404(
+        self, api_client, authenticate, retrieve_and_update_user
+    ):
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+        user = baker.make(User)
+        payload = {
+            "first_name": "John",
+            "last_name": "Doe",
+        }
+
+        res = retrieve_and_update_user(payload, user.id + 10)
+
+        assert res.status_code == status.HTTP_404_NOT_FOUND
 
     def test_if_user_is_admin__has_valid_data_returns_200(
         self, api_client, authenticate, retrieve_and_update_user
@@ -147,6 +161,16 @@ class TestUserDelete:
 
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
+    def test_if_user_is_admin_item_not_exist_returns_404(
+        self, api_client, authenticate, delete_user
+    ):
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+        user = baker.make(User)
+
+        res = delete_user(user.id + 10)
+
+        assert res.status_code == status.HTTP_404_NOT_FOUND
+
     def test_if_user_is_admin_returns_204(self, api_client, authenticate, delete_user):
         authenticate(is_staff=True, role=ROLE_ADMIN)
         user = baker.make(User)
@@ -156,4 +180,5 @@ class TestUserDelete:
         user = User.objects.filter(id=user.id).first()
 
         assert res.status_code == status.HTTP_204_NO_CONTENT
+        assert res.data is None
         assert user is None

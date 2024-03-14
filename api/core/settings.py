@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 #     DEV_APPS = ["debug_toolbar"]
 #     INSTALLED_APPS += DEV_APPS
 
-CUSTOMIZED_APPS = ["core", "accounts"]
+CUSTOMIZED_APPS = ["core", "account"]
 
 INSTALLED_APPS += CUSTOMIZED_APPS
 
@@ -98,7 +98,7 @@ DATABASES = {
 }
 
 
-AUTH_USER_MODEL = "accounts.User"
+AUTH_USER_MODEL = "account.User"
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
 

@@ -6,8 +6,8 @@ from django.shortcuts import get_object_or_404
 # Internal imports
 from core import exceptions
 from core.utils import is_valid_image
-from accounts import serializers
-from accounts.models import User
+from account import serializers
+from account.models import User
 
 
 # User = settings.AUTH_USER_MODEL

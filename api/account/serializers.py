@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from accounts.models import User
+from account.models import User
 
 
 class LoginSerializer(serializers.ModelSerializer):

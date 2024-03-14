@@ -4,7 +4,7 @@ from rest_framework.test import APIClient
 
 from core.constants import ROLE_USER
 from core.settings import BASE_DIR
-from accounts.models import User
+from account.models import User
 
 
 @pytest.fixture

@@ -13,7 +13,7 @@ import pytest
 
 # Internal imports
 from core.constants import ROLE_ADMIN
-from accounts.models import User
+from account.models import User
 
 
 @pytest.fixture
