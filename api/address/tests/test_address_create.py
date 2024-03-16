@@ -1,7 +1,7 @@
 import pytest
 from rest_framework import status
 
-from core.constants import ROLE_ADMIN, ROLE_STUDENT, ROLE_STAFF, ROLE_USER
+from core.constants import ROLE_ADMIN, ROLE_STAFF, ROLE_USER
 
 
 @pytest.fixture
@@ -75,16 +75,6 @@ class TestCreateAddress:
     ):
         self.setUp()
         authenticate(is_staff=True, role=ROLE_USER)
-
-        res = create_address(self.address)
-
-        assert res.status_code == status.HTTP_201_CREATED
-
-    def test_if_user_is_student_has_valid_data_returns_200(
-        self, authenticate, create_address
-    ):
-        self.setUp()
-        authenticate(is_staff=True, role=ROLE_STUDENT)
 
         res = create_address(self.address)
 

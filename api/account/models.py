@@ -4,7 +4,13 @@ from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import AbstractUser, BaseUserManager
 
-from core.constants import ROLE_ADMIN, ROLE_USER, USER_ROLE_CHOICES
+from core.constants import (
+    GENDER_CHOICES,
+    GENDER_MALE,
+    ROLE_ADMIN,
+    ROLE_USER,
+    USER_ROLE_CHOICES,
+)
 
 
 def user_image_path(instance, filename):
@@ -48,6 +54,10 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=100, null=True)
     last_name = models.CharField(max_length=100, null=True)
     email = models.EmailField(unique=True, max_length=100, db_index=True)
+    gender = models.CharField(
+        max_length=10, choices=GENDER_CHOICES, default=GENDER_MALE
+    )
+    date_of_birth = models.DateField(null=True)
     password = models.CharField(max_length=100)
     avatar = models.ImageField(null=True, blank=True, upload_to=user_image_path)
     phone = models.CharField(max_length=50, null=True, unique=True)
