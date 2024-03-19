@@ -25,7 +25,7 @@ class TestRetrieveListAddresses:
         res = retrieve_address()
 
         assert res.status_code == status.HTTP_200_OK
-        assert len(res.data) == 0
+        assert res.data["count"] == 0
 
     def test_if_user_is_anonymous_or_authenticated_returns_200(
         self, authenticate, retrieve_address
@@ -37,7 +37,7 @@ class TestRetrieveListAddresses:
         res = retrieve_address()
 
         assert res.status_code == status.HTTP_200_OK
-        assert len(res.data) == 3
+        assert res.data["count"] == 3
 
 
 @pytest.mark.django_db

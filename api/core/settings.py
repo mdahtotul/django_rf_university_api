@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "rest_framework",
     "rest_framework_simplejwt",
+    "django_filters",
 ]
 # if DEBUG:
 #     DEV_APPS = ["debug_toolbar"]
