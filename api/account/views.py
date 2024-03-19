@@ -9,8 +9,11 @@ from core.permissions import *
 from . import serializers
 from .models import User
 from .services.auth import AccountService
+from .services.filters import UserFilterService
+from .services.pagination import paginate_queryset
 
 account_service = AccountService()
+filter_service = UserFilterService()
 
 
 class RegisterView(APIView):
@@ -50,9 +53,24 @@ class UsersView(APIView):
     permission_classes = [AdminOnly]
 
     def get(self, request):
-        users = User.objects.all()
-        serializer = serializers.SimpleUserSerializer(users, many=True)
-        return Response(serializer.data)
+        name = request.query_params.get("name", None)
+        email = request.query_params.get("email", None)
+        phone = request.query_params.get("phone", None)
+        page_size = request.query_params.get("page_size", 10)
+        queryset = filter_service.user_filter_queryset(
+            queryset=User.objects.all(),
+            request=request,
+            name=name,
+            email=email,
+            phone=phone,
+        )
+
+        return paginate_queryset(
+            queryset,
+            request,
+            page_size=page_size,
+            serializer_class=serializers.SimpleUserSerializer,
+        )
 
 
 class UserDetailsView(APIView):

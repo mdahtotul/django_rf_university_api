@@ -53,9 +53,10 @@ class TestRetrieveListUsers:
         res = retrieve_user()
 
         assert res.status_code == status.HTTP_200_OK
-        assert res.data[0]["email"] == user2.email
-        assert res.data[1]["email"] == user1.email
-        assert len(res.data) == 2
+        assert res.data["count"] == 2
+        results = res.data["results"]
+        assert results[0]["email"] == user2.email
+        assert results[1]["email"] == user1.email
 
 
 @pytest.mark.django_db
