@@ -18,6 +18,11 @@ class Parent(models.Model):
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
     occupation = models.CharField(max_length=255, null=True, blank=True)
 
+    class Meta:
+        ordering = ["-id"]
+        verbose_name = "Parent"
+        verbose_name_plural = "Parents"
+
 
 class Student(models.Model):
     session = models.CharField(max_length=10)
@@ -41,7 +46,7 @@ class Student(models.Model):
     enrollment_date = models.DateField(auto_now_add=True)
     cgpa = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
     credits = models.IntegerField(null=True, blank=True)
-    designation = models.CharField(
+    occupation = models.CharField(
         choices=DESIGNATION_ROLE_CHOICES,
         max_length=50,
         default=DESIGNATION_STUDENT,
@@ -50,11 +55,16 @@ class Student(models.Model):
         max_length=50, choices=DEPARTMENT_CHOICES, default=DEPT_FISH
     )
 
+    class Meta:
+        ordering = ["-id"]
+        verbose_name = "Student"
+        verbose_name_plural = "Students"
+
 
 class Teacher(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
-    designation = models.CharField(
+    occupation = models.CharField(
         choices=DESIGNATION_ROLE_CHOICES,
         max_length=50,
         default=DESIGNATION_ASSOCIATE_PROFESSOR,
