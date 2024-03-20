@@ -4,5 +4,6 @@ from .views import *
 
 router = SimpleRouter()
 router.register(r"parents", viewset=ParentViewSet)
+router.register(r"students", viewset=StudentViewSet)
 
 urlpatterns = router.urls

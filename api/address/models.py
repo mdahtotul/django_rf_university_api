@@ -11,3 +11,8 @@ class Address(models.Model):
         max_length=255, choices=DISTRICT_CHOICES, default=DIST_DHAKA
     )
     country = models.CharField(max_length=255, default="Bangladesh")
+
+    class Meta:
+        ordering = ["-id"]
+        verbose_name = "Address"
+        verbose_name_plural = "Addresses"
