@@ -43,3 +43,23 @@ class UserOrReadOnly(BasePermission):
 class UserOnly(BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.role == ROLE_USER
+
+
+class IsOwnerOrAdminOnly(BasePermission):
+
+    def had_permission(self, request, view):
+        if request.method == "POST":
+            return True
+
+        if request.method in SAFE_METHODS:
+            return request.user.is_authenticated
+
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        # Allow admins to edit/delete any parent object
+        if request.user or request.user.role == ROLE_ADMIN:
+            return True
+
+        # Allow related user to edit/delete the parent object
+        return obj.user == request.user
