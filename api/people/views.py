@@ -3,8 +3,8 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from core.permissions import *
 from core.utils import custom_handle_exception
-from .models import Parent, Student
-from .filters import ParentFilter, StudentFilter
+from .models import Parent, Student, Teacher
+from .filters import ParentFilter, StudentFilter, TeacherFilter
 from .pagination import DefaultPagination
 from .serializers import (
     CreateUpdateParentSerializer,
@@ -50,6 +50,23 @@ class StudentViewSet(viewsets.ModelViewSet):
             return CreateUpdateStudentSerializer
         else:
             return RetrieveStudentSerializer
+
+    def handle_exception(self, exc):
+        return custom_handle_exception(exc, self.request)
+
+
+class TeacherViewSet(viewsets.ModelViewSet):
+    queryset = Teacher.objects.all()
+    permission_classes = [AdminOrReadOnly]
+    pagination_class = DefaultPagination
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = TeacherFilter
+
+    def get_serializer_class(self):
+        if self.request.method in ["POST", "PATCH"]:
+            return CreateUpdateParentSerializer
+        else:
+            return RetrieveParentSerializer
 
     def handle_exception(self, exc):
         return custom_handle_exception(exc, self.request)

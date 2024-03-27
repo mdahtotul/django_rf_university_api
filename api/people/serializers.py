@@ -3,7 +3,7 @@ from rest_framework import serializers
 from account.serializers import SimpleUserSerializer
 from address.serializers import AddressSerializer
 
-from .models import Parent, Student
+from .models import Parent, Student, Teacher
 
 
 class RetrieveParentSerializer(serializers.ModelSerializer):
@@ -75,3 +75,37 @@ class CreateUpdateStudentSerializer(serializers.ModelSerializer):
             exclude_fields = ["student_id", "session"]
             for field_name in exclude_fields:
                 self.fields.pop(field_name)
+
+
+class RetrieveTeacherSerializer(serializers.ModelSerializer):
+    user = SimpleUserSerializer()
+    address = AddressSerializer()
+
+    class Meta:
+        model = Teacher
+        fields = [
+            "id",
+            "user",
+            "address",
+            "occupation",
+            "department",
+            "qualification",
+            "specialist",
+            "joined_date",
+        ]
+
+
+class CreateUpdateTeacherSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Teacher
+        fields = [
+            "user",
+            "address",
+            "occupation",
+            "department",
+            "occupation",
+            "qualification",
+            "specialist",
+            "joined_date",
+        ]
