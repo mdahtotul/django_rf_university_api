@@ -2,7 +2,7 @@ from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.permissions import *
-from core.utils import custom_handle_exception
+from core.utils import format_exception
 from .models import Parent, Student, Teacher
 from .filters import ParentFilter, StudentFilter, TeacherFilter
 from .pagination import DefaultPagination
@@ -35,7 +35,7 @@ class ParentViewSet(viewsets.ModelViewSet):
         return super().get_permissions()
 
     def handle_exception(self, exc):
-        return custom_handle_exception(exc, self.request)
+        return format_exception(exc, self.request)
 
 
 class StudentViewSet(viewsets.ModelViewSet):
@@ -52,7 +52,7 @@ class StudentViewSet(viewsets.ModelViewSet):
             return RetrieveStudentSerializer
 
     def handle_exception(self, exc):
-        return custom_handle_exception(exc, self.request)
+        return format_exception(exc, self.request)
 
 
 class TeacherViewSet(viewsets.ModelViewSet):
@@ -69,4 +69,4 @@ class TeacherViewSet(viewsets.ModelViewSet):
             return RetrieveParentSerializer
 
     def handle_exception(self, exc):
-        return custom_handle_exception(exc, self.request)
+        return format_exception(exc, self.request)

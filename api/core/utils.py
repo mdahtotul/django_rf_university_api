@@ -14,7 +14,7 @@ def is_valid_image(image):
         return False
 
 
-def custom_handle_exception(exc, request):
+def format_exception(exc, request):
     if isinstance(exc, exceptions.ValidationError):
         errors = ""
         for field, errors_list in exc.detail.items():

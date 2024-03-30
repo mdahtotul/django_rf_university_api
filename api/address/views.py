@@ -4,7 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters import rest_framework as filters
 
 from core.permissions import *
-from core.utils import custom_handle_exception
+from core.utils import format_exception
 from .models import Address
 from .filters import AddressFilter
 from .serializers import AddressSerializer
@@ -32,4 +32,4 @@ class AddressViewSet(viewsets.ModelViewSet):
 
     # formatting exception response
     def handle_exception(self, exc):
-        return custom_handle_exception(exc, self.request)
+        return format_exception(exc, self.request)
