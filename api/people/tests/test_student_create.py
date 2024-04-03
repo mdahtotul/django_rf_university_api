@@ -1,6 +1,7 @@
 import pytest
 from rest_framework import status
 
+from institute.models import Department, Faculty
 from people.models import Parent
 from core.constants import ROLE_ADMIN, ROLE_STAFF, ROLE_USER
 from account.models import User
@@ -26,6 +27,8 @@ class TestCreateStudent:
             district="dhaka",
         )
         parent = Parent.objects.create(user=user2, address=address, occupation="test")
+        faculty = Faculty.objects.create(name="Test Faculty")
+        department = Department.objects.create(name="Test Department", faculty=faculty)
         self.student = {
             "student_id": "18207003",
             "user": user.id,
@@ -36,7 +39,7 @@ class TestCreateStudent:
             "session": "2017-2018",
             "semester": "1st semester",
             "year": "1st year",
-            "department": "fisheries",
+            "department": department.id,
             "relationship_to_parent": "Sister",
         }
 

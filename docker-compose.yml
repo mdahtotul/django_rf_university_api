@@ -10,6 +10,7 @@ services:
       - "8000:8000"
     volumes:
       - ./api:/api
+      - dev-static-data:/vol/web
     command: >
       sh -c "python manage.py wait_for_db &&
              python manage.py makemigrations && 
@@ -18,9 +19,10 @@ services:
     environment:
       - DEBUG=${DEBUG}
       - DB_HOST=db # host will be db for docker but localhost for local
-      - DB_NAME=${DB_NAME}
+      - DB_NAME=${DOCKER_DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - RUN_ENV=docker
     depends_on:
       - db
 
@@ -29,9 +31,10 @@ services:
       - dev-db-data:/var/lib/postgresql/data
     image: postgres:13-alpine
     environment:
-      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_DB=${DOCKER_DB_NAME}
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
 
 volumes:
   dev-db-data:
+  dev-static-data:

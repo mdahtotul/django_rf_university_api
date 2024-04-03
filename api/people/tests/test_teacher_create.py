@@ -1,6 +1,7 @@
 import pytest
 from rest_framework import status
 
+from institute.models import Department, Faculty
 from people.models import Parent
 from core.constants import (
     DEPT_FISH,
@@ -30,9 +31,12 @@ class TestCreateTeacher:
             postal_code="1234",
             district="dhaka",
         )
+        faculty = Faculty.objects.create(name="Test Faculty")
+        department = Department.objects.create(name="Test Department", faculty=faculty)
         self.teacher = {
             "user": user.id,
             "address": address.id,
+            "department": department.id,
         }
 
     def test_if_user_is_anonymous_returns_401(self, authenticate, create_teacher):

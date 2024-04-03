@@ -2,7 +2,9 @@ import pytest
 from rest_framework import status
 from model_bakery import baker
 
-from core.constants import ROLE_ADMIN, ROLE_STAFF
+from account.models import User
+from institute.models import Department
+from core.constants import DESIGNATION_CHAIRMAN, ROLE_ADMIN, ROLE_STAFF
 from ..models import Teacher
 
 
@@ -73,12 +75,40 @@ class TestUpdateTeacher:
         authenticate(is_staff=True, role=ROLE_ADMIN)
 
         payload = {
-            "occupation": "marine",
+            "occupation": DESIGNATION_CHAIRMAN,
         }
 
         res = update_teacher(payload, item.id)
 
         assert res.status_code == status.HTTP_200_OK
+
+    def test_if_user_is_admin_can_change_department_returns_200(
+        self, authenticate, update_teacher
+    ):
+        item = baker.make(Teacher)
+        department = baker.make(Department)
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+
+        payload = {"department": department.id}
+
+        res = update_teacher(payload, item.id)
+
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data["department"] == department.id
+
+    def test_if_user_is_admin_can_change_user_returns_200(
+        self, authenticate, update_teacher
+    ):
+        item = baker.make(Teacher)
+        user = baker.make(User)
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+
+        payload = {"user": user.id}
+
+        res = update_teacher(payload, item.id)
+
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data["user"] == user.id
 
 
 @pytest.fixture

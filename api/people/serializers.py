@@ -89,7 +89,7 @@ class RetrieveTeacherSerializer(serializers.ModelSerializer):
             "address",
             "occupation",
             "department",
-            "qualification",
+            "qualifications",
             "specialist",
             "joined_date",
         ]
@@ -105,7 +105,7 @@ class CreateUpdateTeacherSerializer(serializers.ModelSerializer):
             "occupation",
             "department",
             "occupation",
-            "qualification",
+            "qualifications",
             "specialist",
             "joined_date",
         ]

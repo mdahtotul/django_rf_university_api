@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.validators import MaxValueValidator, RegexValidator
 
 from address.models import Address
+from institute.models import Department
 from core.constants import (
     DEGREE_BSC,
     DEGREE_CHOICES,
@@ -51,10 +52,15 @@ class Student(models.Model):
         unique=True,
         validators=[RegexValidator(r"^\d{1,8}$", "Only digits are allowed.")],
     )
+    #  if the user record is deleted, the associated student record will also be deleted.
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    parent = models.ForeignKey(Parent, on_delete=models.CASCADE)
+    # if the associated parent record is deleted, this field will be set to null.
+    parent = models.ForeignKey(Parent, on_delete=models.SET_NULL, null=True, blank=True)
     relationship_to_parent = models.CharField(max_length=255, null=True, blank=True)
-    address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
+    # if the associated address record is deleted, this field will be set to null.
+    address = models.ForeignKey(
+        Address, on_delete=models.SET_NULL, null=True, blank=True
+    )
     enrollment_date = models.DateField(auto_now_add=True)
     cgpa = models.DecimalField(
         max_digits=4,
@@ -69,9 +75,8 @@ class Student(models.Model):
         max_length=50,
         default=DESIGNATION_STUDENT,
     )
-    department = models.CharField(
-        max_length=50, choices=DEPARTMENT_CHOICES, default=DEPT_FISH
-    )
+    # if the associated department record is attempted to be deleted, the deletion will be blocked due to the protect constraint.
+    department = models.OneToOneField(Department, on_delete=models.PROTECT)
     degree = models.CharField(max_length=50, choices=DEGREE_CHOICES, default=DEGREE_BSC)
 
     class Meta:
@@ -88,9 +93,7 @@ class Teacher(models.Model):
         max_length=50,
         default=DESIGNATION_ASSOCIATE_PROFESSOR,
     )
-    department = models.CharField(
-        max_length=50, choices=DEPARTMENT_CHOICES, default=DEPT_FISH
-    )
+    department = models.OneToOneField(Department, on_delete=models.PROTECT)
     joined_date = models.DateField(auto_now_add=True)
     salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     qualifications = models.TextField(null=True, blank=True)

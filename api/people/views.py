@@ -9,8 +9,10 @@ from .pagination import DefaultPagination
 from .serializers import (
     CreateUpdateParentSerializer,
     CreateUpdateStudentSerializer,
+    CreateUpdateTeacherSerializer,
     RetrieveParentSerializer,
     RetrieveStudentSerializer,
+    RetrieveTeacherSerializer,
 )
 
 
@@ -64,9 +66,9 @@ class TeacherViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         if self.request.method in ["POST", "PATCH"]:
-            return CreateUpdateParentSerializer
+            return CreateUpdateTeacherSerializer
         else:
-            return RetrieveParentSerializer
+            return RetrieveTeacherSerializer
 
     def handle_exception(self, exc):
         return format_exception(exc, self.request)
