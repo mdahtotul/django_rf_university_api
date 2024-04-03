@@ -39,6 +39,11 @@ class Course(models.Model):
     # adding one-to-many relationship between department and course. One department can have many courses
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ["-id"]
+        verbose_name = "Course"
+        verbose_name_plural = "Courses"
+
     # Ensure that either year or semester contains data, but not both
     def clean(self):
         if self.year and self.semester:

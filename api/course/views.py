@@ -1,12 +1,12 @@
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 
-from api.course.filters import CourseFilter
 from core.utils import format_exception
 from core.pagination import DefaultPagination
 from core.permissions import AdminOrReadOnly
 
 from .models import Course
+from .filters import CourseFilter
 from .serializers import CreateUpdateCourseSerializer, RetrieveCourseSerializer
 
 
