@@ -2,11 +2,11 @@ from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 
 
+from core.pagination import DefaultPagination
 from core.permissions import AdminOrReadOnly
 from core.utils import format_exception
 from .filters import DepartmentFilter, FacultyFilter
 from .models import Faculty, Department
-from .pagination import DefaultPagination
 from .serializers import (
     CreateUpdateDepartmentSerializer,
     CreateUpdateFacultySerializer,
@@ -15,7 +15,7 @@ from .serializers import (
 )
 
 
-class FacultyViewset(viewsets.ModelViewSet):
+class FacultyViewSet(viewsets.ModelViewSet):
     queryset = Faculty.objects.all()
     permission_classes = [AdminOrReadOnly]
     pagination_class = DefaultPagination
@@ -31,7 +31,7 @@ class FacultyViewset(viewsets.ModelViewSet):
         return format_exception(exc, self.request)
 
 
-class DepartmentViewset(viewsets.ModelViewSet):
+class DepartmentViewSet(viewsets.ModelViewSet):
     queryset = Department.objects.all()
     permission_classes = [AdminOrReadOnly]
     pagination_class = DefaultPagination

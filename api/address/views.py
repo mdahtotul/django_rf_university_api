@@ -3,6 +3,7 @@ from rest_framework.views import exception_handler
 from rest_framework.pagination import PageNumberPagination
 from django_filters import rest_framework as filters
 
+from core.pagination import DefaultPagination
 from core.permissions import *
 from core.utils import format_exception
 from .models import Address
@@ -10,18 +11,11 @@ from .filters import AddressFilter
 from .serializers import AddressSerializer
 
 
-class AddressPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = "page_size"
-    max_page_size = 1000
-    ordering = ["-id"]
-
-
 class AddressViewSet(viewsets.ModelViewSet):
     queryset = Address.objects.all().order_by("-id")
     serializer_class = AddressSerializer
     permission_classes = [AdminOrReadOnly]
-    pagination_class = AddressPagination
+    pagination_class = DefaultPagination
     filter_backends = [filters.DjangoFilterBackend]
     filterset_class = AddressFilter
 

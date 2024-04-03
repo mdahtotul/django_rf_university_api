@@ -1,11 +1,11 @@
 from rest_framework import viewsets, permissions
 from django_filters.rest_framework import DjangoFilterBackend
 
+from core.pagination import DefaultPagination
 from core.permissions import *
 from core.utils import format_exception
 from .models import Parent, Student, Teacher
 from .filters import ParentFilter, StudentFilter, TeacherFilter
-from .pagination import DefaultPagination
 from .serializers import (
     CreateUpdateParentSerializer,
     CreateUpdateStudentSerializer,
