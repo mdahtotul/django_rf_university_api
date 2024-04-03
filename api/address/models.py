@@ -16,3 +16,6 @@ class Address(models.Model):
         ordering = ["-id"]
         verbose_name = "Address"
         verbose_name_plural = "Addresses"
+
+    def __str__(self) -> str:
+        return f"{self.building_and_street}"

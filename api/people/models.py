@@ -7,8 +7,6 @@ from institute.models import Department
 from core.constants import (
     DEGREE_BSC,
     DEGREE_CHOICES,
-    DEPARTMENT_CHOICES,
-    DEPT_FISH,
     DESIGNATION_ASSOCIATE_PROFESSOR,
     DESIGNATION_ROLE_CHOICES,
     DESIGNATION_STUDENT,
@@ -76,7 +74,7 @@ class Student(models.Model):
         default=DESIGNATION_STUDENT,
     )
     # if the associated department record is attempted to be deleted, the deletion will be blocked due to the protect constraint.
-    department = models.OneToOneField(Department, on_delete=models.PROTECT)
+    department = models.ForeignKey(Department, on_delete=models.PROTECT)
     degree = models.CharField(max_length=50, choices=DEGREE_CHOICES, default=DEGREE_BSC)
 
     class Meta:
@@ -93,7 +91,7 @@ class Teacher(models.Model):
         max_length=50,
         default=DESIGNATION_ASSOCIATE_PROFESSOR,
     )
-    department = models.OneToOneField(Department, on_delete=models.PROTECT)
+    department = models.ForeignKey(Department, on_delete=models.PROTECT)
     joined_date = models.DateField(auto_now_add=True)
     salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     qualifications = models.TextField(null=True, blank=True)

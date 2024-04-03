@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from account.serializers import SimpleUserSerializer
 from address.serializers import AddressSerializer
+from institute.serializers import RetrieveDepartmentSerializer
 
 from .models import Parent, Student, Teacher
 
@@ -26,6 +27,7 @@ class RetrieveStudentSerializer(serializers.ModelSerializer):
     user = SimpleUserSerializer()
     address = AddressSerializer()
     parent = RetrieveParentSerializer()
+    department = RetrieveDepartmentSerializer()
 
     class Meta:
         model = Student
@@ -80,6 +82,7 @@ class CreateUpdateStudentSerializer(serializers.ModelSerializer):
 class RetrieveTeacherSerializer(serializers.ModelSerializer):
     user = SimpleUserSerializer()
     address = AddressSerializer()
+    department = RetrieveDepartmentSerializer()
 
     class Meta:
         model = Teacher

@@ -28,10 +28,13 @@ class Faculty(models.Model):
         verbose_name = "Faculty"
         verbose_name_plural = "Faculties"
 
+    def __str__(self) -> str:
+        return self.name
+
 
 class Department(models.Model):
     name = models.CharField(max_length=255)
-    faculty = models.OneToOneField(Faculty, on_delete=models.CASCADE)
+    faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
     description = models.TextField()
     image = models.ImageField(upload_to=department_image_path, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -41,3 +44,6 @@ class Department(models.Model):
         ordering = ["name"]
         verbose_name = "Department"
         verbose_name_plural = "Departments"
+
+    def __str__(self) -> str:
+        return self.name

@@ -78,7 +78,7 @@ class User(AbstractUser):
         verbose_name_plural = "Users"
 
     def __str__(self):
-        return f"{self.id} ---- {self.email}"
+        return f"{self.phone} | {self.email}"
 
 
 User = get_user_model()
