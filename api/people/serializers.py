@@ -108,6 +108,7 @@ class CreateUpdateTeacherSerializer(serializers.ModelSerializer):
             "occupation",
             "department",
             "occupation",
+            "salary",
             "qualifications",
             "specialist",
             "joined_date",

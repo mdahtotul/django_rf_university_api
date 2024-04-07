@@ -17,7 +17,7 @@ def department_image_path(instance, filename):
 
 
 class Faculty(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     description = models.TextField()
     image = models.ImageField(upload_to=faculty_image_path, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -33,7 +33,7 @@ class Faculty(models.Model):
 
 
 class Department(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     faculty = models.ForeignKey(Faculty, on_delete=models.CASCADE)
     description = models.TextField()
     image = models.ImageField(upload_to=department_image_path, null=True, blank=True)

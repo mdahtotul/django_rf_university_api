@@ -14,7 +14,7 @@ def course_thumbnail_path(instance, filename):
 
 
 class Course(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     code = models.CharField(max_length=50, unique=True)
     description = models.TextField(null=True, blank=True)
     thumbnail = models.ImageField(
