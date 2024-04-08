@@ -3,7 +3,7 @@ from rest_framework import status
 
 from institute.models import Department, Faculty
 from people.models import Parent
-from core.constants import ROLE_ADMIN, ROLE_STAFF, ROLE_USER
+from core.constants import ROLE_ADMIN, ROLE_STAFF, ROLE_USER, SEM_1, YEAR_1ST
 from account.models import User
 from address.models import Address
 
@@ -37,8 +37,7 @@ class TestCreateStudent:
             "cgpa": "3.62",
             "credits": 28,
             "session": "2017-2018",
-            "semester": "1st semester",
-            "year": "1st year",
+            "semester": SEM_1,
             "department": department.id,
             "relationship_to_parent": "Sister",
         }
@@ -129,6 +128,31 @@ class TestCreateStudent:
         self.setUp()
         authenticate(is_staff=True, role=ROLE_STAFF)
         self.student["department"] = "test"
+        res = create_student(self.student)
+
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_if_user_is_staff_has_both_year_semester_returns_400(
+        self, authenticate, create_student
+    ):
+        self.setUp()
+        authenticate(is_staff=True, role=ROLE_STAFF)
+        self.student["year"] = YEAR_1ST
+        self.student["semester"] = SEM_1
+        res = create_student(self.student)
+
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_if_user_is_staff_has_no_year_semester_returns_400(
+        self, authenticate, create_student
+    ):
+        self.setUp()
+        authenticate(is_staff=True, role=ROLE_STAFF)
+        if self.student.get("year"):
+            del self.student["year"]
+        if self.student.get("semester"):
+            del self.student["semester"]
+
         res = create_student(self.student)
 
         assert res.status_code == status.HTTP_400_BAD_REQUEST

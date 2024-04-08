@@ -2,7 +2,7 @@ import pytest
 from rest_framework import status
 from model_bakery import baker
 
-from core.constants import ROLE_ADMIN, ROLE_STAFF
+from core.constants import ROLE_ADMIN, ROLE_STAFF, SEM_1, YEAR_1ST
 from account.models import User
 from institute.models import Department
 from ..models import Student
@@ -57,6 +57,46 @@ class TestUpdateStudent:
         res = update_student(payload, item.id + 5)
 
         assert res.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_if_user_is_admin_has_both_year_semester_returns_400(
+        self, authenticate, update_student
+    ):
+        item = baker.make(Student)
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+
+        payload = {"year": YEAR_1ST, "semester": SEM_1}
+
+        res = update_student(payload, item.id)
+
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_if_user_is_admin_has_semester_returns_200_with_year_null(
+        self, authenticate, update_student
+    ):
+        item = baker.make(Student, year=YEAR_1ST)
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+
+        payload = {"semester": SEM_1}
+
+        res = update_student(payload, item.id)
+
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data["semester"] is not None
+        assert res.data["year"] is None
+
+    def test_if_user_is_admin_has_year_returns_200_with_semester_null(
+        self, authenticate, update_student
+    ):
+        item = baker.make(Student, semester=SEM_1)
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+
+        payload = {"year": YEAR_1ST}
+
+        res = update_student(payload, item.id)
+
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data["semester"] is None
+        assert res.data["year"] is not None
 
     def test_if_user_is_staff_returns_200(self, authenticate, update_student):
         item = baker.make(Student)

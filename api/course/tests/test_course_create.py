@@ -55,7 +55,7 @@ class TestCreateCourse:
 
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_if_user_is_admin_with_no_name_returns_400(
+    def test_if_user_is_admin_has_no_name_returns_400(
         self, authenticate, create_course
     ):
         self.setUp()
@@ -65,7 +65,7 @@ class TestCreateCourse:
 
         assert res.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_if_user_is_admin_with_no_code_returns_400(
+    def test_if_user_is_admin_has_no_code_returns_400(
         self, authenticate, create_course
     ):
         self.setUp()
@@ -75,12 +75,35 @@ class TestCreateCourse:
 
         assert res.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_if_user_is_admin_with_no_department_returns_400(
+    def test_if_user_is_admin_has_no_department_returns_400(
         self, authenticate, create_course
     ):
         self.setUp()
         authenticate(is_staff=True, role=ROLE_ADMIN)
         del self.course["department"]
+        res = create_course(self.course)
+
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_if_user_is_admin_has_no_year_no_semester_returns_400(
+        self, authenticate, create_course
+    ):
+        self.setUp()
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+        del self.course["year"]
+        if self.course.get("semester"):
+            del self.course["semester"]
+        res = create_course(self.course)
+
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_if_user_is_admin_has_both_year_semester_returns_400(
+        self, authenticate, create_course
+    ):
+        self.setUp()
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+        self.course["year"] = YEAR_1ST
+        self.course["semester"] = SEM_1
         res = create_course(self.course)
 
         assert res.status_code == status.HTTP_400_BAD_REQUEST

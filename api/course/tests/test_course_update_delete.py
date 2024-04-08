@@ -4,7 +4,7 @@ from PIL import Image
 from rest_framework import status
 from model_bakery import baker
 
-from core.constants import ROLE_ADMIN, ROLE_STAFF
+from core.constants import ROLE_ADMIN, ROLE_STAFF, SEM_1, YEAR_1ST
 from course.models import Course
 
 
@@ -61,6 +61,56 @@ class TestUpdateCourse:
         res = update_course(payload, item.id + 5)
 
         assert res.status_code == status.HTTP_404_NOT_FOUND
+
+    def test_if_user_is_admin_has_both_year_semester_returns_400(
+        self, authenticate, update_course
+    ):
+        item = baker.make(Course)
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+
+        payload = {
+            "name": "test course",
+            "year": YEAR_1ST,
+            "semester": SEM_1,
+        }
+
+        res = update_course(payload, item.id)
+
+        assert res.status_code == status.HTTP_400_BAD_REQUEST
+
+    def test_if_user_is_admin_has_no_year_but_semester_returns_200_with_year_null(
+        self, authenticate, update_course
+    ):
+        item = baker.make(Course, year=YEAR_1ST)
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+
+        payload = {
+            "name": "test course",
+            "semester": SEM_1,
+        }
+
+        res = update_course(payload, item.id)
+
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data["year"] is None
+        assert res.data["semester"] is not None
+
+    def test_if_user_is_admin_has_no_semester_but_year_returns_200_with_semester_null(
+        self, authenticate, update_course
+    ):
+        item = baker.make(Course, semester=SEM_1)
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+
+        payload = {
+            "name": "test course",
+            "year": YEAR_1ST,
+        }
+
+        res = update_course(payload, item.id)
+
+        assert res.status_code == status.HTTP_200_OK
+        assert res.data["year"] is not None
+        assert res.data["semester"] is None
 
     def test_if_user_is_admin_returns_200(self, authenticate, update_course):
         item = baker.make(Course)

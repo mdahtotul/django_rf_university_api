@@ -1,7 +1,6 @@
 import os
 from uuid import uuid4
 from django.db import models
-from django.core.exceptions import ValidationError
 
 from core.constants import SEMESTER_CHOICES, YEAR_CHOICES
 from institute.models import Department
@@ -17,6 +16,7 @@ class Course(models.Model):
     name = models.CharField(max_length=255, unique=True)
     code = models.CharField(max_length=50, unique=True)
     description = models.TextField(null=True, blank=True)
+    credit = models.PositiveIntegerField(default=1)
     thumbnail = models.ImageField(
         upload_to=course_thumbnail_path, null=True, blank=True
     )
@@ -44,11 +44,5 @@ class Course(models.Model):
         verbose_name = "Course"
         verbose_name_plural = "Courses"
 
-    # Ensure that either year or semester contains data, but not both
-    def clean(self):
-        if self.year and self.semester:
-            raise ValidationError(
-                "Either year or semester can contain data, but not both."
-            )
-        elif not self.year and not self.semester:
-            raise ValidationError("Either year or semester must contain data.")
+    def __str__(self):
+        return f"{self.name} | {self.code}"

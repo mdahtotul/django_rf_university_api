@@ -1,10 +1,14 @@
 from rest_framework import serializers
 
+
+from core.validations import SemesterYearSerializerValidations
 from account.serializers import SimpleUserSerializer
 from address.serializers import AddressSerializer
 from institute.serializers import RetrieveDepartmentSerializer
 
 from .models import Parent, Student, Teacher
+
+yearSemesterValidation = SemesterYearSerializerValidations()
 
 
 class RetrieveParentSerializer(serializers.ModelSerializer):
@@ -67,6 +71,14 @@ class CreateUpdateStudentSerializer(serializers.ModelSerializer):
             "department",
             "relationship_to_parent",
         ]
+
+    def validate(self, data):
+        if self.instance:
+            yearSemesterValidation.patch_method_validate(self.instance, data)
+        else:
+            yearSemesterValidation.post_method_validate(data)
+
+        return data
 
     # Override serializer for update method
     def __init__(self, *args, **kwargs):
