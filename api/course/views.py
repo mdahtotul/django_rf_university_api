@@ -1,4 +1,4 @@
-from rest_framework import viewsets
+from rest_framework import viewsets, generics
 from django_filters.rest_framework import DjangoFilterBackend
 
 from core.utils import format_exception
@@ -7,7 +7,11 @@ from core.permissions import AdminOrReadOnly
 
 from .models import Course
 from .filters import CourseFilter
-from .serializers import CreateUpdateCourseSerializer, RetrieveCourseSerializer
+from .serializers import (
+    CreateUpdateCourseSerializer,
+    RetrieveCourseSerializer,
+    RetrieveDepartmentCourseSerializer,
+)
 
 
 class CourseViewSet(viewsets.ModelViewSet):
@@ -21,6 +25,20 @@ class CourseViewSet(viewsets.ModelViewSet):
         if self.request.method in ["POST", "PATCH"]:
             return CreateUpdateCourseSerializer
         return RetrieveCourseSerializer
+
+    def handle_exception(self, exc):
+        return format_exception(exc, self.request)
+
+
+class DepartmentCourseViewSet(generics.ListAPIView):
+    serializer_class = RetrieveDepartmentCourseSerializer
+    permission_classes = [AdminOrReadOnly]
+    pagination_class = DefaultPagination
+
+    def get_queryset(self):
+        department_id = self.kwargs.get("department_id")
+        queryset = Course.objects.filter(department_id=department_id)
+        return queryset
 
     def handle_exception(self, exc):
         return format_exception(exc, self.request)
