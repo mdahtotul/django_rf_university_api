@@ -47,7 +47,15 @@ INSTALLED_APPS = [
 #     DEV_APPS = ["debug_toolbar"]
 #     INSTALLED_APPS += DEV_APPS
 
-CUSTOMIZED_APPS = ["core", "account", "address", "people", "institute", "course"]
+CUSTOMIZED_APPS = [
+    "core",
+    "account",
+    "address",
+    "people",
+    "institute",
+    "course",
+    "course_catalog",
+]
 
 INSTALLED_APPS += CUSTOMIZED_APPS
 

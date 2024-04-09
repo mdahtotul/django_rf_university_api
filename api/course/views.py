@@ -31,6 +31,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 
 class DepartmentCourseViewSet(generics.ListAPIView):
+    # getting all the courses of a department
     serializer_class = RetrieveDepartmentCourseSerializer
     permission_classes = [AdminOrReadOnly]
     pagination_class = DefaultPagination
