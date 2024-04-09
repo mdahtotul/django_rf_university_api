@@ -30,4 +30,14 @@ class Chapter(models.Model):
         return f"{self.id} -- {self.name}"
 
 
+class Year(models.Model):
+    year = models.CharField(max_length=4, unique=True)
+    total_questions = models.PositiveIntegerField(null=True, blank=True, default=0)
 
+    class Meta:
+        ordering = ["-year"]
+        verbose_name = "Year"
+        verbose_name_plural = "Years"
+
+    def __str__(self) -> str:
+        return f"{self.id} -- {self.year}"

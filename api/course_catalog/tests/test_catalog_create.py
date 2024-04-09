@@ -8,6 +8,49 @@ from course_catalog.models import Subject
 
 
 @pytest.fixture
+def create_year(api_client):
+    def receive_year_instance(instance):
+        return api_client.post("/api/course_catalogs/years/", instance)
+
+    return receive_year_instance
+
+
+@pytest.mark.django_db
+class TestCreateYear:
+    def setUp(self):
+        self.year = {"year": "2024"}
+
+    def test_if_user_is_anonymous_returns_401(self, authenticate, create_year):
+        self.setUp()
+        res = create_year(self.year)
+
+        assert res.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_if_user_is_user_returns_403(self, authenticate, create_year):
+        self.setUp()
+        authenticate(is_staff=True, role=ROLE_USER)
+        res = create_year(self.year)
+
+        assert res.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_staff_returns_403(self, authenticate, create_year):
+        self.setUp()
+        authenticate(is_staff=True, role=ROLE_STAFF)
+        res = create_year(self.year)
+
+        assert res.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_if_user_is_admin_has_valid_data_returns_201(
+        self, authenticate, create_year
+    ):
+        self.setUp()
+        authenticate(is_staff=True, role=ROLE_ADMIN)
+        res = create_year(self.year)
+
+        assert res.status_code == status.HTTP_201_CREATED
+
+
+@pytest.fixture
 def create_subject(api_client):
     def receive_subject_instance(instance):
         return api_client.post("/api/course_catalogs/subjects/", instance)
@@ -40,7 +83,9 @@ class TestCreateSubject:
 
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_if_user_is_admin_returns_403(self, authenticate, create_subject):
+    def test_if_user_is_admin_has_valid_data_returns_201(
+        self, authenticate, create_subject
+    ):
         self.setUp()
         authenticate(is_staff=True, role=ROLE_ADMIN)
         res = create_subject(self.subject)
@@ -82,7 +127,9 @@ class TestCreateChapter:
 
         assert res.status_code == status.HTTP_403_FORBIDDEN
 
-    def test_if_user_is_admin_returns_403(self, authenticate, create_chapter):
+    def test_if_user_is_admin_has_valid_data_returns_201(
+        self, authenticate, create_chapter
+    ):
         self.setUp()
         authenticate(is_staff=True, role=ROLE_ADMIN)
         res = create_chapter(self.chapter)

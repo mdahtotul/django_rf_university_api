@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from course_catalog.models import Subject, Chapter
+from course_catalog.models import Subject, Chapter, Year
 
 
 class SimpleSubjectSerializer(serializers.ModelSerializer):
@@ -61,3 +61,9 @@ class CreateUpdateChapterSerializer(serializers.ModelSerializer):
             "total_questions",
             "subject",
         ]
+
+
+class YearSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Year
+        fields = "__all__"
