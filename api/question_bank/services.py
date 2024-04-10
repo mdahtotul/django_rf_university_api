@@ -1,18 +1,21 @@
 from django.db import transaction
 from django.db.models import Q
 
-from rest_framework import status
-from rest_framework.response import Response
-
-from core.exceptions import BadRequest
+from core.exceptions import BadRequest, NotFoundError
 from course_catalog.models import Chapter, Subject, Year
+
+from .serializers import RetrieveQuestionMCQSerializer
 from .models import QuestionBank, QuestionMCQ, Stem
+from .pagination import paginate_queryset
+from .utils import FormatQuestionData
+
+question_data_formatter = FormatQuestionData()
 
 
 class QuestionServices:
-    def get_question(self, subject: str, chapter: str, year):
+    def get_question(self, request, subject: str, chapter: str, year):
         try:
-            question_bank_query = Q(subject__name__iexact=subject) | Q(
+            question_bank_query = Q(subject__name__iexact=subject) & Q(
                 chapter__name__iexact=chapter
             )
 
@@ -20,20 +23,26 @@ class QuestionServices:
                 question_bank_query &= Q(year__year__exact=year)
 
             question_bank = QuestionBank.objects.filter(question_bank_query).first()
-            if not question_bank:
-                return Response(
-                    {"message": "No question bank found"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-            questions = QuestionMCQ.objects.filter(question_bank=question_bank.id)
-            if not questions:
-                return Response(
-                    {"message": "No questions found"},
-                    status=status.HTTP_404_NOT_FOUND,
-                )
-            return questions
+            if question_bank is None:
+                raise NotFoundError("No question bank found")
+
+            queryset = QuestionMCQ.objects.filter(question_bank=question_bank.id)
+
+            if queryset is None:
+                raise NotFoundError("No questions found")
+
+            paginated_qs = paginate_queryset(
+                queryset, request, 10, RetrieveQuestionMCQSerializer
+            )
+            paginated_data = paginated_qs.data
+
+            serialized_data = question_data_formatter.format_question_data(
+                paginated_data.get("results", [])
+            )
+            paginated_data["results"] = serialized_data
+            return paginated_data
+
         except Exception as e:
-            print(e)
             raise e
 
     def add_question(

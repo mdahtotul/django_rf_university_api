@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
+from core.permissions import AdminOrReadOnly
 from core.utils import format_exception
 from .services import QuestionServices
 
@@ -9,6 +10,8 @@ questionServices = QuestionServices()
 
 
 class QuestionViewSet(APIView):
+    permission_classes = [AdminOrReadOnly]
+
     def get(self, request):
         subject_name = request.query_params.get("subject_name")
         chapter_name = request.query_params.get("chapter_name")
@@ -16,11 +19,12 @@ class QuestionViewSet(APIView):
 
         if subject_name is None or chapter_name is None:
             return Response(
-                {"message": "Subject name and chapter name both parameters required"},
+                {"details": "Subject name and chapter name both parameters required"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
         questions = questionServices.get_question(
+            request=request,
             subject=subject_name,
             chapter=chapter_name,
             year=year,
@@ -33,10 +37,6 @@ class QuestionViewSet(APIView):
         chapter_name = request.data.get("chapter_name")
         year = request.data.get("year")
         stems = request.data.get("stems")
-        # tags = request.data.get("tags")
-        # total_questions = request.data.get("total_questions")
-
-        # questions = request.data.get("questions")
 
         questionServices.add_question(
             subject=subject_name,

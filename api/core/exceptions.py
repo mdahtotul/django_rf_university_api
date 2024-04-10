@@ -11,6 +11,17 @@ class CustomAPIException(APIException):
         return error_dict
 
 
+class TypeErrorResponse(CustomAPIException):
+    status_code = status.HTTP_417_EXPECTATION_FAILED
+    default_detail = "Expected type error"
+    default_code = "expected_type_error"
+
+    def __init__(self, details=None):
+        if details is not None:
+            self.default_detail = details
+        super().__init__()
+
+
 class BadRequest(CustomAPIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = "Bad request"
