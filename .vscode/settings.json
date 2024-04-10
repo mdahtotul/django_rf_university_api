@@ -1,5 +1,11 @@
 {
   "python.testing.pytestArgs": ["api"],
   "python.testing.unittestEnabled": false,
-  "python.testing.pytestEnabled": true
+  "python.testing.pytestEnabled": true,
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#0d452f", // Replace #YOUR_COLOR with your color of choice
+    "titleBar.activeForeground": "#ffffff",
+    "statusBar.background": "#0d452f",
+    "statusBar.foreground": "#ffffff"
+  }
 }

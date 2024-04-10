@@ -28,6 +28,7 @@ urlpatterns = [
     path("api/", include("institute.urls")),
     path("api/", include("course.urls")),
     path("api/course_catalogs/", include("course_catalog.urls")),
+    path("api/", include("question_bank.urls")),
 ]
 
 if settings.DEBUG:

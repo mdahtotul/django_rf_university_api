@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "django_filters",
+    "django_jsonform",
 ]
 # if DEBUG:
 #     DEV_APPS = ["debug_toolbar"]
@@ -55,6 +56,7 @@ CUSTOMIZED_APPS = [
     "institute",
     "course",
     "course_catalog",
+    "question_bank",
 ]
 
 INSTALLED_APPS += CUSTOMIZED_APPS

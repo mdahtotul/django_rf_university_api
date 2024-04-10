@@ -5,3 +5,4 @@ Pillow>=10.2.0,<10.3
 psycopg2-binary==2.9.9
 djangorestframework-simplejwt>=5.3.1,<5.4
 django-filter>=24.1,<25
+django-jsonform>=2.22.0,<2.23
