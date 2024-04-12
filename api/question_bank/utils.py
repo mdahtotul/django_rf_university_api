@@ -1,3 +1,6 @@
+from docx.api import Document as ReadDocument
+
+
 class FormatQuestionData:
     def single_question_format(self, data):
         return {
@@ -38,3 +41,76 @@ class FormatQuestionData:
             current_questions.append(self.single_question_format(item))
 
         return formatted_data
+
+
+class FileUploadProcess:
+
+    def extract_single_question(self, list_data: list, stem: str):
+        question = {}
+
+        question["stem"] = stem
+        for item in list_data.split("\n"):
+            if item.strip().startswith("[QUESTION_TEXT]"):
+                question["question_text"] = item.strip()[
+                    len("[QUESTION_TEXT]") :
+                ].strip()  # remove [QUESTION_TEXT] from the string
+            elif item.strip().startswith("[TAGS]"):
+                tags = item.strip()[len("[TAGS]") :].split(",")
+                sanitized_tags = [tag.strip() for tag in tags]
+                question["tags"] = sanitized_tags  # remove [TAGS] from the string
+            elif item.strip().startswith("[OPTION_1]"):
+                question["option_1"] = item.strip()[
+                    len("[OPTION_1]") :
+                ].strip()  # remove [OPTION_1] from the string
+            elif item.strip().startswith("[OPTION_2]"):
+                question["option_2"] = item.strip()[
+                    len("[OPTION_2]") :
+                ].strip()  # remove [OPTION_2] from the string
+            elif item.strip().startswith("[OPTION_3]"):
+                question["option_3"] = item.strip()[
+                    len("[OPTION_3]") :
+                ].strip()  # remove [OPTION_3] from the string
+            elif item.strip().startswith("[OPTION_4]"):
+                question["option_4"] = item.strip()[
+                    len("[OPTION_4]") :
+                ].strip()  # remove [OPTION_4] from the string
+            elif item.strip().startswith("[OPTION_5]"):
+                question["option_5"] = item.strip()[
+                    len("[OPTION_5]") :
+                ].strip()  # remove [OPTION_5] from the string
+            elif item.strip().startswith("[CORRECT_ANSWER]"):
+                ans = item.strip()[len("[CORRECT_ANSWER]") :].split(",")
+                sanitized_ans = [int(item) for item in ans]
+                question["CORRECT_ANSWER"] = sanitized_ans
+            elif item.strip().startswith("[EXPLANATION]"):
+                question["option_5"] = item.strip()[
+                    len("[EXPLANATION]") :
+                ].strip()  # remove [EXPLANATION] from the string
+
+        return question
+
+    def extract_data_from_docx(self, file_path):
+        read_doc = ReadDocument(file_path)
+
+        all_data = ""
+
+        for p in read_doc.paragraphs:
+            all_data += p.text
+            all_data += "\n"
+
+        all_questions = []
+
+        for stem_question_data in all_data.split("[STEM_QUESTION_END]"):
+            stem_lines = stem_question_data.strip().split("\n")
+            stem_description = None
+            if len(stem_lines) > 1 and stem_lines[1].startswith("[STEM_DESCRIPTION]"):
+                stem_description = (
+                    stem_lines[1].replace("[STEM_DESCRIPTION]", "").strip()
+                )
+
+            for question_data in stem_question_data.split("[QUESTION_END]"):
+                question = self.extract_single_question(question_data, stem_description)
+                if bool(question) and len(question) > 1:
+                    all_questions.append(question)
+
+        return all_questions

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt",
     "django_filters",
     "django_jsonform",
+    "docx",
 ]
 # if DEBUG:
 #     DEV_APPS = ["debug_toolbar"]
