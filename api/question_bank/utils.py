@@ -49,15 +49,18 @@ class FileUploadProcess:
         question = {}
 
         question["stem"] = stem
-        for item in list_data.split("\n"):
-            if item.strip().startswith("[QUESTION_TEXT]"):
+        for item in list_data.split("[END]"):
+            if item.strip().startswith("[QUESTION_BEGIN]") or item.strip().startswith(
+                "[STEM_QUESTION_BEGIN]\n[QUESTION_BEGIN]"
+            ):
+                tag_str = item.strip().split("[TAGS]")[1]
+                tags = tag_str.split(",")
+                sanitized_tags = [tag.strip() for tag in tags]
+                question["tags"] = sanitized_tags  # remove [TAGS] from the string
+            elif item.strip().startswith("[QUESTION_TEXT]"):
                 question["question_text"] = item.strip()[
                     len("[QUESTION_TEXT]") :
                 ].strip()  # remove [QUESTION_TEXT] from the string
-            elif item.strip().startswith("[TAGS]"):
-                tags = item.strip()[len("[TAGS]") :].split(",")
-                sanitized_tags = [tag.strip() for tag in tags]
-                question["tags"] = sanitized_tags  # remove [TAGS] from the string
             elif item.strip().startswith("[OPTION_1]"):
                 question["option_1"] = item.strip()[
                     len("[OPTION_1]") :
@@ -83,7 +86,7 @@ class FileUploadProcess:
                 sanitized_ans = [int(item) for item in ans]
                 question["CORRECT_ANSWER"] = sanitized_ans
             elif item.strip().startswith("[EXPLANATION]"):
-                question["option_5"] = item.strip()[
+                question["explanation"] = item.strip()[
                     len("[EXPLANATION]") :
                 ].strip()  # remove [EXPLANATION] from the string
 
@@ -101,16 +104,23 @@ class FileUploadProcess:
         all_questions = []
 
         for stem_question_data in all_data.split("[STEM_QUESTION_END]"):
-            stem_lines = stem_question_data.strip().split("\n")
+            stem_lines = stem_question_data.strip().split("[END]")
+            # print(stem_lines)
             stem_description = None
-            if len(stem_lines) > 1 and stem_lines[1].startswith("[STEM_DESCRIPTION]"):
-                stem_description = (
-                    stem_lines[1].replace("[STEM_DESCRIPTION]", "").strip()
-                )
+            extract_stem = stem_lines[0].strip().split("[STEM_DESCRIPTION]")
+            if len(extract_stem) > 1:
+                stem_description = extract_stem[1]
 
             for question_data in stem_question_data.split("[QUESTION_END]"):
                 question = self.extract_single_question(question_data, stem_description)
                 if bool(question) and len(question) > 1:
                     all_questions.append(question)
 
+        print(all_questions)
         return all_questions
+
+
+path = "d:/personal/django_rf_university_api/api/question_bank/QUESTION.docx"
+
+
+FileUploadProcess().extract_data_from_docx(path)
