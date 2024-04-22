@@ -26,9 +26,9 @@ class AccountService:
         try:
             if email is None or email == "":
                 raise exceptions.BadRequest("Email is required!")
-            if password is None or password == "":
+            elif password is None or password == "":
                 raise exceptions.BadRequest("Password is required!")
-            if User.objects.filter(email=email).exists():
+            elif User.objects.filter(email=email).exists():
                 raise exceptions.ConflictError("User already exists!")
 
             new_user = User.objects.create_user(
