@@ -1,11 +1,13 @@
 import re
 import os
+import base64
+import shutil
 from docx.api import Document as ReadDocument
 from bs4 import BeautifulSoup
 
-# from core.exceptions import BadRequest
+from core.settings import BASE_DIR
+from core.exceptions import BadRequest
 
-import base64
 
 STEM_QUESTIONS_BEGIN = "[STEM_QUESTION_BEGIN]"
 STEM_DESCRIPTION = "[STEM_DESCRIPTION]"
@@ -129,7 +131,6 @@ class FileUploadProcess:
 
         for stem_question_data in all_data.split("[STEM_QUESTION_END]"):
             stem_lines = stem_question_data.strip().split("[END]")
-            # print(stem_lines)
             stem_description = None
             extract_stem = stem_lines[0].strip().split("[STEM_DESCRIPTION]")
             if len(extract_stem) > 1:
@@ -140,13 +141,12 @@ class FileUploadProcess:
                 if bool(question) and len(question) > 1:
                     all_questions.append(question)
 
-        print(all_questions)
         return all_questions
 
 
 class WebScrappingProcess:
     def img_to_base64(self, img_tag):
-        image_src = os.path.join("media/que_files", img_tag["src"])
+        image_src = os.path.join(BASE_DIR, "media", "que_files", img_tag["src"])
         with open(image_src, "rb") as image_file:
             base64_image = base64.b64encode(image_file.read()).decode("utf-8")
             img_tag["src"] = f"data:image/png;base64,{base64_image}"
@@ -189,9 +189,11 @@ class WebScrappingProcess:
         return i, temp
 
     def extract_questions_from_stem(
-        self, question_list: list, paragraph_tags, index: int, stem=None
+        self,
+        paragraph_tags,
+        index: int,
     ):
-
+        question_list = []
         for i in range(index, len(paragraph_tags)):
             if STEM_QUESTION_END in paragraph_tags[i].text.strip():
                 break
@@ -218,10 +220,10 @@ class WebScrappingProcess:
                         paragraph=str(paragraph_tags[idx]),
                         text_to_remove=QUESTION_NUMBER,
                     )
-                # else:
-                #     raise BadRequest(
-                #         f"{QUESTION_NUMBER} not found in question {question_number}"
-                #     )
+                else:
+                    raise BadRequest(
+                        f"{QUESTION_NUMBER} not found in question {question_number}"
+                    )
 
                 # after getting que number go to the next line
                 idx = idx + 1
@@ -237,10 +239,9 @@ class WebScrappingProcess:
                         tag.strip() for tag in self.sanitize_tags(tags).split(",")
                     ]
 
-                # else:
-                #         raise BadRequest(
-                #             f"{TAGS} not found in question {question_number}"
-                #         )
+                else:
+                    raise BadRequest(f"{TAGS} not found in question {question_number}")
+
                 text = paragraph_tags[idx].text.strip()
                 if QUESTION_TEXT in text:
                     idx, question_text = self.parse_paragraph(
@@ -250,10 +251,10 @@ class WebScrappingProcess:
                         stopping_tag=OPTION_1,
                     )
 
-                # # else:
-                # #     raise BadRequest(
-                # #         f"{QUESTION_TEXT} not found in question {question_number}"
-                # #     )
+                else:
+                    raise BadRequest(
+                        f"{QUESTION_TEXT} not found in question {question_number}"
+                    )
 
                 text = paragraph_tags[idx].text.strip()
                 if OPTION_1 in text:
@@ -264,10 +265,10 @@ class WebScrappingProcess:
                         stopping_tag=OPTION_2,
                     )
 
-                # # else:
-                # #     raise BadRequest(
-                # #         f"{OPTION_1} not found in question {question_number}"
-                # #     )
+                else:
+                    raise BadRequest(
+                        f"{OPTION_1} not found in question {question_number}"
+                    )
 
                 text = paragraph_tags[idx].text.strip()
                 if OPTION_2 in text:
@@ -278,10 +279,10 @@ class WebScrappingProcess:
                         stopping_tag=OPTION_3,
                     )
 
-                # # else:
-                # #     raise BadRequest(
-                # #         f"{OPTION_2} not found in question {question_number}"
-                # #     )
+                else:
+                    raise BadRequest(
+                        f"{OPTION_2} not found in question {question_number}"
+                    )
 
                 text = paragraph_tags[idx].text.strip()
                 if OPTION_3 in text:
@@ -323,10 +324,10 @@ class WebScrappingProcess:
                         for ans in self.sanitize_tags(correct_answer).split(",")
                     ]
 
-                # else:
-                #     raise BadRequest(
-                #         f"{CORRECT_ANSWERS} not found in question {question_number}"
-                #     )
+                else:
+                    raise BadRequest(
+                        f"{CORRECT_ANSWERS} not found in question {question_number}"
+                    )
 
                 text = paragraph_tags[idx].text.strip()
                 if EXPLANATION in text:
@@ -338,12 +339,12 @@ class WebScrappingProcess:
                     )
 
                 text = paragraph_tags[idx].text.strip()
-                # if QUESTION_END not in text:
-                #     raise BadRequest(
-                #         f"{QUESTION_END} not found in question {question_number}"
-                #     )
+                if QUESTION_END not in text:
+                    raise BadRequest(
+                        f"{QUESTION_END} not found in question {question_number}"
+                    )
+
                 formatted_question = {
-                    "stem": stem,
                     "question_text": question_text,
                     "tags": tag_list,
                     "option1": option_1,
@@ -354,14 +355,16 @@ class WebScrappingProcess:
                     "correct_ans": correct_answer_list,
                     "explanation": explanation,
                 }
-                print(f"question_item --> {formatted_question}\n")
+
                 question_list.append(formatted_question)
 
         return question_list
 
     def extract_question_list_from_htm(self, file_path):
         with open(file_path, "r", encoding="utf8", errors="ignore") as f:
-            question_list = []
+            stem_with_question_list = []
+            total_questions = 0
+
             contents = f.read()
             soup = BeautifulSoup(contents, "html.parser")
 
@@ -391,16 +394,36 @@ class WebScrappingProcess:
                         )
                         stem = stem_description
 
-                    self.extract_questions_from_stem(
-                        question_list=question_list,
+                    question_list = self.extract_questions_from_stem(
                         paragraph_tags=paragraph_tags,
                         index=idx,
-                        stem=stem,
                     )
 
-            return question_list
+                    formatted_stem_with_questions = {
+                        "description": stem if stem else None,
+                        "questions": question_list,
+                    }
+
+                    stem_with_question_list.append(formatted_stem_with_questions)
+
+            return total_questions, stem_with_question_list
+
+
+class OSProcess:
+    def delete_contents_from_file_or_directory(self, directory):
+        # iterate over all files and folders in the given directory
+        for item in os.listdir(directory):
+            item_path = os.path.join(directory, item)
+
+            # check if the item is a file
+            if os.path.isfile(item_path):
+                os.remove(item_path)  # delete the file
+
+            # check if the item is a directory
+            elif os.path.isdir(item_path):
+                shutil.rmtree(item_path)  # delete the directory and its contents
 
 
 # FileUploadProcess().extract_data_from_docx(path)
-htm_path = "d:/personal/django_rf_university_api/media/que_files/QUESTION_SCRAPPING.htm"
-WebScrappingProcess().extract_question_list_from_htm(htm_path)
+# htm_path = "d:/personal/django_rf_university_api/media/que_files/QUESTION_SCRAPPING.htm"
+# WebScrappingProcess().extract_question_list_from_htm(htm_path)

@@ -1,15 +1,22 @@
+import glob
+import os
+from zipfile import ZipFile
 from django.db import transaction
 from django.db.models import Q
+from django.core.files.storage import FileSystemStorage
 
 from core.exceptions import BadRequest, NotFoundError
+from core.settings import BASE_DIR
 from course_catalog.models import Chapter, Subject, Year
 
 from .serializers import RetrieveQuestionMCQSerializer
 from .models import QuestionBank, QuestionMCQ, Stem
 from .pagination import paginate_queryset
-from .utils import FormatQuestionData
+from .utils import FormatQuestionData, WebScrappingProcess, OSProcess
 
 question_data_formatter = FormatQuestionData()
+os_process = OSProcess()
+scrapping = WebScrappingProcess()
 
 
 class QuestionServices:
@@ -78,27 +85,29 @@ class QuestionServices:
                     for question_obj in questions:
                         question_text = question_obj.get("question_text", None)
                         tags = question_obj.get("tags", None)
-                        options = question_obj.get("options", None)
+                        option1 = question_obj.get("option1", None)
+                        option2 = question_obj.get("option2", None)
+                        option3 = question_obj.get("option3", None)
+                        option4 = question_obj.get("option4", None)
+                        option5 = question_obj.get("option5", None)
+                        correct_ans = question_obj.get("correct_ans", None)
                         explanation = question_obj.get("explanation", None)
 
-                        options_text = [obj["option"] for obj in options]
-                        options_text.extend([None] * (5 - len(options)))
-
-                        correct_ans = [
-                            idx
-                            for idx, obj in enumerate(options, start=1)
-                            if obj["is_correct"]
-                        ]
+                        for ans in correct_ans:
+                            if question_obj.get(f"option{ans}") is None:
+                                raise BadRequest(
+                                    f"Correct answer option{ans} has no data"
+                                )
 
                         mcq_question_list.append(
                             QuestionMCQ(
                                 stem=stem if description else None,
                                 question_text=question_text,
-                                option1=options_text[0],
-                                option2=options_text[1],
-                                option3=options_text[2],
-                                option4=options_text[3],
-                                option5=options_text[4],
+                                option1=option1,
+                                option2=option2,
+                                option3=option3,
+                                option4=option4,
+                                option5=option5,
                                 explanation=explanation,
                                 correct_ans=correct_ans,
                                 question_bank_id=question_bank_id,
@@ -107,5 +116,50 @@ class QuestionServices:
                         )
 
                     QuestionMCQ.objects.bulk_create(mcq_question_list)
+        except Exception as e:
+            raise e
+
+
+class QuestionUploadServices:
+    def upload_zipped_html_file(
+        self, subject: str, chapter: str, year: None | str, zip_file
+    ):
+        root_folder = os.path.join(BASE_DIR, "media", "que_files")
+
+        try:
+            if os.path.exists(root_folder) is False:
+                os.mkdir(root_folder)
+            else:
+                os_process.delete_contents_from_file_or_directory(root_folder)
+
+            fs = FileSystemStorage(location=root_folder)
+            fs.save(zip_file.name, zip_file)
+            zip_file_path = glob.glob(os.path.join(root_folder, "*.zip"))[0]
+
+            with ZipFile(zip_file_path, mode="r") as zf:
+                zf.extractall(path=root_folder)
+
+            htm_file_path = glob.glob(os.path.join(root_folder, "*.htm"))
+            if not htm_file_path:
+                raise BadRequest(".htm file not found")
+
+            total_questions, content = scrapping.extract_question_list_from_htm(
+                file_path=htm_file_path[0]
+            )
+
+            if len(content) > 0:
+                formattedData = {
+                    "subject": subject,
+                    "chapter": chapter,
+                    "year": year,
+                    "stem_list": content,
+                }
+
+                QuestionServices().add_question(**formattedData)
+
+                return total_questions
+            else:
+                raise BadRequest("No questions found")
+
         except Exception as e:
             raise e
