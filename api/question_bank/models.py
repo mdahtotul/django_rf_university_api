@@ -1,10 +1,12 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
 
+from course.models import Course
 from course_catalog.models import Subject, Chapter, Year
 
 
 class QuestionBank(models.Model):
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
     subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
     chapter = models.ForeignKey(Chapter, on_delete=models.CASCADE)
     year = models.ForeignKey(Year, default=None, on_delete=models.CASCADE)
@@ -19,11 +21,12 @@ class QuestionBank(models.Model):
         verbose_name_plural = "QuestionBanks"
 
     def __str__(self) -> str:
+        course = self.course.name
         subject = self.subject.name
         chapter = self.chapter.name
         year = self.year.year
 
-        return f"{self.id} - {subject} - {chapter} - {year} - {self.duration} min - {self.total_questions} questions"
+        return f"{self.id} - {course} - {subject} - {chapter} - {year} - {self.duration} min - {self.total_questions} questions"
 
 
 class Stem(models.Model):

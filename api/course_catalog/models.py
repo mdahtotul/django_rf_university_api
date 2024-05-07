@@ -26,7 +26,7 @@ class Chapter(models.Model):
         verbose_name = "Chapter"
         verbose_name_plural = "Chapters"
 
-    def __str__(self) -> str:
+    def __str__(self) -> str: 
         return f"{self.id} -- {self.name}"
 
 

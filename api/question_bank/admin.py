@@ -9,6 +9,7 @@ class QuestionBankAdmin(admin.ModelAdmin):
         "subject",
         "chapter",
         "year",
+        "total_questions"
     )
 
 

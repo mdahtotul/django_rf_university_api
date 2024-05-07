@@ -15,6 +15,7 @@ class QuestionViewSet(APIView):
     permission_classes = [AdminOrReadOnly]
 
     def get(self, request):
+        course_name = request.query_params.get("course_name")
         subject_name = request.query_params.get("subject_name")
         chapter_name = request.query_params.get("chapter_name")
         year = request.query_params.get("year")
@@ -24,6 +25,7 @@ class QuestionViewSet(APIView):
 
         questions = questionServices.get_question(
             request=request,
+            course=course_name,
             subject=subject_name,
             chapter=chapter_name,
             year=year,
@@ -32,12 +34,14 @@ class QuestionViewSet(APIView):
         return Response(questions, status=status.HTTP_200_OK)
 
     def post(self, request):
+        course_name = request.data.get("course_name")
         subject_name = request.data.get("subject_name")
         chapter_name = request.data.get("chapter_name")
         year = request.data.get("year")
         stems = request.data.get("stems")
 
-        questionServices.add_question(
+        total_questions = questionServices.add_question(
+            course=course_name,
             subject=subject_name,
             chapter=chapter_name,
             year=year,
@@ -45,7 +49,7 @@ class QuestionViewSet(APIView):
         )
 
         return Response(
-            {"details": "Question added successfully!"}, status=status.HTTP_201_CREATED
+            {"details": f"{total_questions} Question added successfully!"}, status=status.HTTP_201_CREATED
         )
 
     def handle_exception(self, exc):
@@ -56,18 +60,19 @@ class QuestionUploadViewSet(APIView):
     # permission_classes = [AdminOrReadOnly]
 
     def post(self, request):
+        course_name = request.data.get("course_name")
         subject_name = request.data.get("subject_name")
         chapter_name = request.data.get("chapter_name")
         year = request.data.get("year")
         zip_file = request.FILES.get("zip_file")
 
-        if subject_name is None or chapter_name is None:
-            raise BadRequest("Subject name and chapter name both parameters required")
+        if course_name is None or subject_name is None or chapter_name is None:
+            raise BadRequest("Course name and Subject name and chapter name parameters required")
 
         if zip_file is None:
             raise BadRequest("File not found")
 
-        total_questions = questionUploadServices.upload_zipped_html_file(
+        total_questions = questionUploadServices.upload_zipped_html_file(course=course_name,
             subject=subject_name, chapter=chapter_name, year=year, zip_file=zip_file
         )
 
@@ -75,10 +80,6 @@ class QuestionUploadViewSet(APIView):
             {"details": f"{total_questions} questions add successfully"},
             status=status.HTTP_201_CREATED,
         )
-
-        # return Response(
-        #     {"details": "Question added successfully!"}, status=status.HTTP_201_CREATED
-        # )
 
     def handle_exception(self, exc):
         return format_exception(exc, self.request)

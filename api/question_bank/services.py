@@ -5,6 +5,7 @@ from django.db import transaction
 from django.db.models import Q
 from django.core.files.storage import FileSystemStorage
 
+from course.models import Course
 from core.exceptions import BadRequest, NotFoundError
 from core.settings import BASE_DIR
 from course_catalog.models import Chapter, Subject, Year
@@ -20,9 +21,9 @@ scrapping = WebScrappingProcess()
 
 
 class QuestionServices:
-    def get_question(self, request, subject: str, chapter: str, year):
+    def get_question(self, request, course:str, subject: str, chapter: str, year):
         try:
-            question_bank_query = Q(subject__name__iexact=subject) & Q(
+            question_bank_query = Q(course__name__iexact=course) & Q(subject__name__iexact=subject) & Q(
                 chapter__name__iexact=chapter
             )
 
@@ -54,6 +55,7 @@ class QuestionServices:
 
     def add_question(
         self,
+        course=str,
         subject=str,
         chapter=str,
         year=None | str,
@@ -62,12 +64,16 @@ class QuestionServices:
         try:
             with transaction.atomic():
                 # use old question bank if available otherwise create new one
-                question_bank, created = QuestionBank.objects.get_or_create(
-                    subject=Subject.objects.get(name__iexact=subject),
-                    chapter=Chapter.objects.get(name__iexact=chapter),
-                    year=Year.objects.get(year__exact=year),
+                course_obj=Course.objects.get(name__iexact=course)
+                subject_obj=Subject.objects.get(name__iexact=subject)
+                chapter_obj=Chapter.objects.get(name__iexact=chapter)
+                year_obj=Year.objects.get(year__exact=year)
+                
+                question_bank, created = QuestionBank.objects.get_or_create(course=course_obj, subject=subject_obj, chapter=chapter_obj, year=year_obj
                 )
                 question_bank_id = question_bank.id
+                
+                new_questions = 0
 
                 for stem_obj in stem_list:
                     description = stem_obj.get("description", None)
@@ -80,6 +86,8 @@ class QuestionServices:
                     # stem question will have more than one question
                     if description and len(questions) < 2:
                         raise BadRequest("Stem must have at least 2 questions")
+                    
+                    new_questions += len(questions)
 
                     mcq_question_list = []
                     for question_obj in questions:
@@ -116,13 +124,29 @@ class QuestionServices:
                         )
 
                     QuestionMCQ.objects.bulk_create(mcq_question_list)
+                
+                # updating total question count to related tables
+                question_bank.total_questions += new_questions
+                question_bank.save()
+                
+                subject_obj.total_questions += new_questions
+                subject_obj.save()
+                
+                chapter_obj.total_questions += new_questions
+                chapter_obj.save()
+                
+                if year_obj:
+                    year_obj.total_questions += new_questions
+                    year_obj.save()
+                
+                return new_questions
         except Exception as e:
             raise e
 
 
 class QuestionUploadServices:
     def upload_zipped_html_file(
-        self, subject: str, chapter: str, year: None | str, zip_file
+        self, course: str, subject: str, chapter: str, year: None | str, zip_file
     ):
         root_folder = os.path.join(BASE_DIR, "media", "que_files")
 
@@ -146,18 +170,19 @@ class QuestionUploadServices:
             total_questions, content = scrapping.extract_question_list_from_htm(
                 file_path=htm_file_path[0]
             )
-
+            
             if len(content) > 0:
                 formattedData = {
+                    "course": course,
                     "subject": subject,
                     "chapter": chapter,
                     "year": year,
                     "stem_list": content,
                 }
 
-                QuestionServices().add_question(**formattedData)
+                new_questions = QuestionServices().add_question(**formattedData)
 
-                return total_questions
+                return new_questions
             else:
                 raise BadRequest("No questions found")
 
