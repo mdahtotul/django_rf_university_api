@@ -73,7 +73,7 @@ class QuestionServices:
                 )
                 question_bank_id = question_bank.id
                 
-                new_questions = 0
+                new_question_count = 0
 
                 for stem_obj in stem_list:
                     description = stem_obj.get("description", None)
@@ -87,7 +87,7 @@ class QuestionServices:
                     if description and len(questions) < 2:
                         raise BadRequest("Stem must have at least 2 questions")
                     
-                    new_questions += len(questions)
+                    new_question_count += len(questions)
 
                     mcq_question_list = []
                     for question_obj in questions:
@@ -126,23 +126,116 @@ class QuestionServices:
                     QuestionMCQ.objects.bulk_create(mcq_question_list)
                 
                 # updating total question count to related tables
-                question_bank.total_questions += new_questions
+                question_bank.total_questions += new_question_count
                 question_bank.save()
                 
-                subject_obj.total_questions += new_questions
+                subject_obj.total_questions += new_question_count
                 subject_obj.save()
                 
-                chapter_obj.total_questions += new_questions
+                chapter_obj.total_questions += new_question_count
                 chapter_obj.save()
                 
                 if year_obj:
-                    year_obj.total_questions += new_questions
+                    year_obj.total_questions += new_question_count
                     year_obj.save()
                 
-                return new_questions
+                return new_question_count
         except Exception as e:
             raise e
-
+        
+    def get_question_by_id(self, question_id: int):
+        try:
+            question = QuestionMCQ.objects.filter(id=question_id).values().first()
+            if question is None:
+                raise NotFoundError("No question found")
+            
+            return question
+        except Exception as e:
+            raise e
+        
+    def edit_question(
+        self, 
+        question_id: int, 
+        question_text: None | str, 
+        option1: None | str, 
+        option2: None | str, 
+        option3: None | str, 
+        option4: None | str, 
+        option5: None | str, 
+        correct_ans: None | list, 
+        explanation: None | str
+    ):
+        try:
+            question = QuestionMCQ.objects.filter(id=question_id).first()
+            
+            if question is None:
+                raise NotFoundError("No question found")
+            
+            if question_text:
+                question.question_text = question_text
+                
+            if option1:
+                question.option1 = option1
+                
+            if option2:
+                question.option2 = option2
+                
+            if option3:
+                question.option3 = option3
+                
+            if option4:
+                question.option4 = option4
+                
+            if option5:
+                question.option5 = option5
+                
+            if correct_ans:
+                new_ans = []
+                for ans in correct_ans:
+                    if ans and ans != '':
+                        new_ans.append(int(ans))
+                        
+                question.correct_ans = new_ans
+                
+            if explanation:
+                question.explanation = explanation
+                
+            question.save()
+            
+            return question.id
+        
+        except Exception as e:
+            raise e
+        
+    
+    def delete_question(self, question_id):
+        try:
+            with transaction.atomic():
+                question = QuestionMCQ.objects.get(id=question_id)
+                if question is None:
+                    raise NotFoundError("No question found")
+                question_bank = QuestionBank.objects.get(id=question.question_bank_id)
+                print(f"course-{question_bank.course_id}, subject-{question_bank.subject_id}, chapter-{question_bank.chapter_id}, year-{question_bank.year_id}")
+                
+                question.delete()
+                # decrementing total questions count in related tables
+                question_bank.total_questions -= 1
+                question_bank.save()
+                subject = Subject.objects.get(id=question_bank.subject_id)
+                subject.total_questions -= 1
+                subject.save()
+                chapter = Chapter.objects.get(id=question_bank.chapter_id)
+                chapter.total_questions -= 1
+                chapter.save()
+                if question_bank.year_id is not None:
+                    year = Year.objects.get(id=question_bank.year_id)
+                    year.total_questions -= 1
+                    year.save()
+                    
+                return question_id
+        except Exception as e:
+            raise e
+        
 
 class QuestionUploadServices:
     def upload_zipped_html_file(
@@ -180,9 +273,9 @@ class QuestionUploadServices:
                     "stem_list": content,
                 }
 
-                new_questions = QuestionServices().add_question(**formattedData)
+                new_question_count = QuestionServices().add_question(**formattedData)
 
-                return new_questions
+                return new_question_count
             else:
                 raise BadRequest("No questions found")
 
