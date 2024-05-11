@@ -72,7 +72,6 @@ class TestCreateTeacher:
         self.setUp()
         authenticate(is_staff=True, role=ROLE_ADMIN)
         self.teacher["user"] = self.teacher["user"] + 5
-        print(self.teacher)
         res = create_teacher(self.teacher)
 
         assert res.status_code == status.HTTP_400_BAD_REQUEST

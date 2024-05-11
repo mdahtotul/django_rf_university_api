@@ -72,7 +72,10 @@ class PaymentSubmitView(APIView):
     def post(self, request):
         try:
             with transaction.atomic():
-                payment_data = request.POST
+                payment_data = (
+                    request.POST
+                )  # this data is sending as form-data format by ssl payment gateway
+
                 customer_id = int(payment_data["value_a"])
                 department_id = int(payment_data["value_b"])
                 customer_email = payment_data["value_c"]
@@ -108,7 +111,7 @@ class PaymentSubmitView(APIView):
                         },
                         status=HTTP_200_OK,
                     )
-                if payment_data["status"] == "FAILED":
+                elif payment_data["status"] == "FAILED":
                     # storing data to payment table
                     payment = Payment.objects.create(
                         student=student,
@@ -121,6 +124,8 @@ class PaymentSubmitView(APIView):
                     return Response(
                         {"data": model_to_dict(payment)}, status=HTTP_200_OK
                     )
+                else:
+                    raise BadRequest("Invalid payment status!")
         except Exception as e:
             raise e
 
