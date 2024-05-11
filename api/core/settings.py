@@ -58,6 +58,7 @@ CUSTOMIZED_APPS = [
     "course",
     "course_catalog",
     "question_bank",
+    "payment",
 ]
 
 INSTALLED_APPS += CUSTOMIZED_APPS

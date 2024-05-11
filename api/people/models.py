@@ -20,6 +20,9 @@ class Parent(models.Model):
     address = models.ForeignKey(Address, on_delete=models.SET_NULL, null=True)
     occupation = models.CharField(max_length=255, null=True, blank=True)
 
+    def __str__(self) -> str:
+        return f"{self.user.email} | {self.occupation}"
+
     class Meta:
         ordering = ["-id"]
         verbose_name = "Parent"
@@ -77,6 +80,9 @@ class Student(models.Model):
     department = models.ForeignKey(Department, on_delete=models.PROTECT)
     degree = models.CharField(max_length=50, choices=DEGREE_CHOICES, default=DEGREE_BSC)
 
+    def __str__(self) -> str:
+        return f"{self.user.email} | {self.student_id}"
+
     class Meta:
         ordering = ["-id"]
         verbose_name = "Student"
@@ -96,6 +102,9 @@ class Teacher(models.Model):
     salary = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     qualifications = models.TextField(null=True, blank=True)
     specialist = models.TextField(null=True, blank=True)
+
+    def __str__(self) -> str:
+        return f"{self.user.email} | {self.occupation}"
 
     class Meta:
         ordering = ["-id"]

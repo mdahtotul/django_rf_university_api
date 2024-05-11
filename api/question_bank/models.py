@@ -17,8 +17,8 @@ class QuestionBank(models.Model):
     negative_mark_value = models.FloatField(default=0.00)
 
     class Meta:
-        verbose_name = "QuestionBank"
-        verbose_name_plural = "QuestionBanks"
+        verbose_name = "Question Bank"
+        verbose_name_plural = "Question Banks"
 
     def __str__(self) -> str:
         course = self.course.name
