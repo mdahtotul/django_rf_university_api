@@ -7,5 +7,6 @@
     "titleBar.activeForeground": "#ffffff",
     "statusBar.background": "#0d452f",
     "statusBar.foreground": "#ffffff"
-  }
+  },
+  "cSpell.words": ["tinymce"]
 }
