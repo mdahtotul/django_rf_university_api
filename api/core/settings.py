@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "django_filters",
     "django_jsonform",
     "docx",
+    "tinymce",
 ]
 # if DEBUG:
 #     DEV_APPS = ["debug_toolbar"]
@@ -171,4 +172,24 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(hours=12),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "AUTH_HEADER_TYPES": ("JWT", "Bearer"),
+}
+
+# for free tinymce editor to type equations copy and paste the below code and add tinymce to settings app
+TINYMCE_JS_URL = "tinymce/tinymce.min.js"
+
+TINYMCE_DEFAULT_CONFIG = {
+    "height": "320px",
+    "width": "960px",
+    "menubar": "file edit view insert format tools table help",
+    "plugins": "advlist autolink lists link image charmap print preview anchor searchreplace visualblocks code "
+    "fullscreen insertdatetime media table paste code help wordcount",
+    "external_plugins": {
+        "tiny_mce_wiris": "https://www.wiris.net/demo/plugins/tiny_mce/plugin.js"
+    },
+    "toolbar": "undo redo | bold italic underline strikethrough | fontselect fontsizeselect formatselect | alignleft | tiny_mce_wiris_formulaEditor | tiny_mce_wiris_formulaEditorChemistry"
+    "aligncenter alignright alignjustify | outdent indent |  numlist bullist checklist | forecolor "
+    "backcolor casechange permanentpen formatpainter removeformat | pagebreak | charmap emoticons | "
+    "fullscreen  preview save print | insertfile image media pageembed template link anchor codesample | "
+    "a11ycheck ltr rtl | showcomments addcomment code",
+    "custom_undo_redo_levels": 10,
 }

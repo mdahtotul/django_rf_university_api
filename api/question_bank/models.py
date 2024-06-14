@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.postgres.fields import ArrayField
+from tinymce import models as tinymce_models
 
 from course.models import Course
 from course_catalog.models import Subject, Chapter, Year
@@ -30,7 +31,7 @@ class QuestionBank(models.Model):
 
 
 class Stem(models.Model):
-    description = models.TextField()
+    description = tinymce_models.HTMLField()
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -45,13 +46,13 @@ class QuestionMCQ(models.Model):
     question_bank = models.ForeignKey(QuestionBank, on_delete=models.CASCADE)
     stem = models.ForeignKey(Stem, on_delete=models.CASCADE, null=True, blank=True)
     tags = ArrayField(models.CharField(max_length=70), default=list)
-    question_text = models.TextField()
-    option1 = models.TextField()
-    option2 = models.TextField()
-    option3 = models.TextField(blank=True, null=True)
-    option4 = models.TextField(blank=True, null=True)
-    option5 = models.TextField(blank=True, null=True)
-    explanation = models.TextField(blank=True, null=True)
+    question_text = tinymce_models.HTMLField()
+    option1 = tinymce_models.HTMLField()
+    option2 = tinymce_models.HTMLField()
+    option3 = tinymce_models.HTMLField(blank=True, null=True)
+    option4 = tinymce_models.HTMLField(blank=True, null=True)
+    option5 = tinymce_models.HTMLField(blank=True, null=True)
+    explanation = tinymce_models.HTMLField(blank=True, null=True)
     correct_ans = ArrayField(models.IntegerField(), default=list, size=5)
     created_at = models.DateTimeField(auto_now_add=True)
 
